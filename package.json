@@ -1,0 +1,25 @@
+{
+  "name": "create-airfoil-nextjs-app",
+  "version": "1.0.0",
+  "description": "",
+  "bin": {
+    "create-airfoil-nextjs-app": "./createNextApp.js"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tzeweiwee/create-airfoil-nextjs-app.git"
+  },
+  "author": "Eric",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tzeweiwee/create-airfoil-nextjs-app/issues"
+  },
+  "homepage": "https://github.com/tzeweiwee/create-airfoil-nextjs-app#readme",
+  "dependencies": {
+    "chalk": "^5.1.2",
+    "figlet": "^1.5.2",
+    "prompts": "^2.4.2",
+    "validate-npm-package-name": "^5.0.0"
+  }
+}
