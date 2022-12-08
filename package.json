@@ -1,9 +1,9 @@
 {
-  "name": "create-airfoil-nextjs-app",
+  "name": "create-airfoil-nextjs-app-experimental",
   "version": "1.0.0",
   "description": "",
   "bin": {
-    "create-airfoil-nextjs-app": "./createNextApp.js"
+    "create-airfoil-nextjs-app-experimental": "./createNextApp.js"
   },
   "scripts": {},
   "repository": {
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/tzeweiwee/create-airfoil-nextjs-app#readme",
   "dependencies": {
-    "chalk": "^5.1.2",
+    "chalk": "4.1.2",
     "figlet": "^1.5.2",
     "prompts": "^2.4.2",
     "validate-npm-package-name": "^5.0.0"

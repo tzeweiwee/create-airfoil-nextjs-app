@@ -6,26 +6,32 @@ const fs = require('fs');
 const figlet = require('figlet');
 const prompts = require('prompts');
 const validate = require('validate-npm-package-name');
+const chalk = require('chalk');
 
 /**
  * Program flow
- * 1. check node version
+ *
+ * 1. validate node version
  * 2. run init function
- * 3. validate projectName
- * 4. check yarn, pnpm, npm versions
- * 5. compile commands for installation
- * 6. install the dependencies
+ * 3. validate project name
+ * 4. validate project path
+ * 5. clone template
+ * 6. prompt user for css framework and package manager of choice
+ * 7. install the dependencies
+ * 8. copy over boilerplate codes based on chosen css framework
+ *
+ * 9. if any error occurs, after creating a directory, the directory would be deleted
  */
 
 /**
  * Prompts
  *
  * 1. yarn, pnpm, npm
- * 2. CSS styling, ChakraUI/Tailwindcss/None
+ * 2. Chakra UI, Tailwindcss, None
  */
 
 let projectName, projectPath;
-let cssStyleFramework
+let cssStyleFramework;
 const GITHUB_REPO = 'git@github.com:tzeweiwee/nextjs-template.git';
 
 const questions = [
@@ -75,22 +81,22 @@ function validateNodeVersion() {
   const major = semver[0];
 
   if (major < 14) {
-    console.error(
+    console.error(chalk.red(
       'You are running Node ' +
         currentNodeVersion +
         '.\n' +
         'Create Airfoil Next App requires Node 14 or higher. \n' +
         'Please update your version of Node.'
-    );
+    ));
     process.exit(1);
   }
 }
 
 function validateAppName() {
   if (process.argv.length < 3) {
-    console.log('You have to provide a name to your app.');
+    console.log(chalk.red('You have to provide a name to your app.'));
     console.log('For example :');
-    console.log(' npx create-airfoil-nextjs-app my-app');
+    console.log(chalk.green(' npx create-airfoil-nextjs-app my-app'));
     process.exit(1);
   }
 
@@ -100,23 +106,32 @@ function validateAppName() {
   const validationResult = validate(projectName);
   if (!validationResult.validForNewPackages) {
     console.error(
-      `Error: cannot create a project named ${projectName} because of npm naming restrictions.`
+      chalk.red(
+        `Cannot create a project named ${chalk.green(
+          projectName
+        )} due to npm naming restrictions.`
+      )
     );
-    console.log(`Please fix the errors below: `);
-    validationResult.errors.forEach((err) => console.error(`${err}`));
-    validationResult.warnings.forEach((warning) => console.warn(`${warning}`));
+    console.log(chalk.yellow(`Please fix the errors below: `));
+    if (validationResult.errors) {
+      validationResult.errors.forEach((err) => console.error(` - ${chalk.red(err)}`));
+    }
+    if (validationResult.warnings) {
+      validationResult.warnings.forEach((warning) => console.warn(` - ${chalk.yellow(warning)}`));
+    }
+    process.exit(1);
   }
 }
 
 function validateProjectPath() {
   if (fs.existsSync(projectPath)) {
-    console.error('Error: Directory already exist');
+    console.error(chalk.red('Directory already exist, please choose another directory or project name'));
     process.exit(1);
   }
 }
 
 function cloneRepo() {
-  console.log('Cloning files...');
+  console.log(chalk.white.bgBlue.bold('Cloning files...'));
   execSync(`git clone --depth 1 ${GITHUB_REPO} ${projectPath}`);
 }
 
@@ -126,9 +141,9 @@ async function installDependencies() {
 
   const { packageManager, cssStyling } = await prompts(questions);
   cssStyleFramework = cssStyling;
-  const cssStyleDependencies = getCssDependencies(cssStyling)
+  const cssStyleDependencies = getCssDependencies(cssStyling);
 
-  console.log('Installing dependencies...');
+  console.log(chalk.white.bgBlue.bold('Installing dependencies...'));
   // option to use PNPM, Yarn and NPM
   execSync(`${packageManager} install`);
   // option to install css frameworks or none
@@ -141,19 +156,20 @@ function copyBoilerplateFiles() {
   if (!cssStyleFramework || cssStyleFramework === 'none') {
     return;
   }
+  console.log(chalk.white.bgBlue.bold('Copying boilerplate files...'));
   // copy boilerplate files to root project for chosen css framework
-  execSync(`rsync -avh boilerplate_files/${cssStyleFramework}/* ./`)
+  execSync(`rsync -avh boilerplate_files/${cssStyleFramework}/* ./`);
 }
 
 function cleanUp() {
-  console.log('Cleaning up...');
-  fs.rmSync('./.git', { recursive: true })
-  fs.rmSync('./boilerplate_files', { recursive: true })
+  console.log(chalk.white.bgBlue.bold('Cleaning up...'));
+  fs.rmSync('./.git', { recursive: true });
+  fs.rmSync('./boilerplate_files', { recursive: true });
 }
 
 function deleteDirectory() {
-  console.log('Removing project...');
-  fs.rmdirSync(projectPath, { recursive: true });
+  console.log(chalk.white.bgBlue.bold('Removing project...'));
+  fs.rmSync(projectPath, { recursive: true });
 }
 
 function startUp() {
@@ -162,7 +178,7 @@ function startUp() {
 
 function success() {
   console.log(figlet.textSync('SUCCESS!'));
-  console.log(`Airfoil NextJS App created! cd ${projectName} to start!`);
+  console.log(chalk.green.bold(`Airfoil NextJS App created! cd ${projectName} to start!`));
 }
 
 async function init() {
@@ -178,7 +194,7 @@ async function init() {
     cleanUp();
     success();
   } catch (err) {
-    console.error(err);
+    console.error(chalk.red(err));
     deleteDirectory();
   }
 }
