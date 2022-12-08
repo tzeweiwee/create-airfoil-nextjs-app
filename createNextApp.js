@@ -8,7 +8,7 @@ const prompts = require('prompts');
 const validate = require('validate-npm-package-name');
 
 /**
- *
+ * Program flow
  * 1. check node version
  * 2. run init function
  * 3. validate projectName
@@ -18,14 +18,15 @@ const validate = require('validate-npm-package-name');
  */
 
 /**
- * Questions to ask
+ * Prompts
  *
  * 1. yarn, pnpm, npm
  * 2. CSS styling, ChakraUI/Tailwindcss/None
  */
 
 let projectName, projectPath;
-const GITHUB_REPO = 'git@github.com:Aztriltus/nextjs-ts-tailwind-template.git';
+let cssStyleFramework
+const GITHUB_REPO = 'git@github.com:tzeweiwee/nextjs-template.git';
 
 const questions = [
   {
@@ -60,7 +61,7 @@ function setProjectPath() {
 function getCssDependencies(cssStyleFramework) {
   switch (cssStyleFramework) {
     case 'chakraui':
-      return 'chakra-ui/react @emotion/react@^11 @emotion/styled@^11 framer-motion@^6';
+      return '@chakra-ui/react @emotion/react@^11 @emotion/styled@^11 framer-motion@^6';
     case 'tailwindcss':
       return 'tailwindcss postcss autoprefixer';
     default:
@@ -120,29 +121,38 @@ function cloneRepo() {
 }
 
 async function installDependencies() {
-  // ask for npm, yarn, pnpm choice
-  // let packageManager = 'npm';
   // change working directory
   process.chdir(projectPath);
 
   const { packageManager, cssStyling } = await prompts(questions);
+  cssStyleFramework = cssStyling;
   const cssStyleDependencies = getCssDependencies(cssStyling)
 
   console.log('Installing dependencies...');
   // option to use PNPM, Yarn and NPM
   execSync(`${packageManager} install`);
+  // option to install css frameworks or none
   if (cssStyleDependencies) {
     execSync(`${packageManager} install ${cssStyleDependencies}`);
   }
 }
 
+function copyBoilerplateFiles() {
+  if (!cssStyleFramework || cssStyleFramework === 'none') {
+    return;
+  }
+  // copy boilerplate files to root project for chosen css framework
+  execSync(`rsync -avh boilerplate_files/${cssStyleFramework}/* ./`)
+}
+
 function cleanUp() {
-  console.log('Cleaning up');
-  execSync('npx rimraf ./.git');
+  console.log('Cleaning up...');
+  fs.rmSync('./.git', { recursive: true })
+  fs.rmSync('./boilerplate_files', { recursive: true })
 }
 
 function deleteDirectory() {
-  console.log('Removing project');
+  console.log('Removing project...');
   fs.rmdirSync(projectPath, { recursive: true });
 }
 
@@ -164,6 +174,7 @@ async function init() {
   try {
     cloneRepo();
     await installDependencies();
+    copyBoilerplateFiles();
     cleanUp();
     success();
   } catch (err) {
