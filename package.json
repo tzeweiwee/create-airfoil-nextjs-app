@@ -1,6 +1,6 @@
 {
   "name": "create-airfoil-nextjs-app-experimental",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A scaffolding NextJS template powered by CLI",
   "bin": {
     "create-airfoil-nextjs-app-experimental": "./createNextApp.js"
