@@ -32,7 +32,7 @@ const chalk = require('chalk');
 
 let projectName, projectPath;
 let cssStyleFramework;
-const GITHUB_REPO = 'git@github.com:tzeweiwee/nextjs-template.git';
+const GITHUB_REPO = 'https://github.com/tzeweiwee/nextjs-template.git';
 
 const questions = [
   {
