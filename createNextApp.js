@@ -32,6 +32,7 @@ const chalk = require('chalk');
 
 let projectName, projectPath;
 let cssStyleFramework;
+let isCurrentDir = false; // if user is installing in the current directory
 const GITHUB_REPO = 'https://github.com/tzeweiwee/nextjs-template.git';
 
 const questions = [
@@ -102,6 +103,12 @@ function validateAppName() {
 
   projectName = process.argv[2];
 
+  // local directory is allowed
+  if (projectName === '.') {
+    isCurrentDir = true
+    return;
+  }
+
   // making sure the project name conforms to NPM naming convention
   const validationResult = validate(projectName);
   if (!validationResult.validForNewPackages) {
@@ -124,7 +131,7 @@ function validateAppName() {
 }
 
 function validateProjectPath() {
-  if (fs.existsSync(projectPath)) {
+  if (!isCurrentDir && fs.existsSync(projectPath)) {
     console.error(chalk.red('Directory already exist, please choose another directory or project name'));
     process.exit(1);
   }
@@ -133,6 +140,17 @@ function validateProjectPath() {
 function cloneRepo() {
   console.log(chalk.white.bgBlue.bold('Cloning files...'));
   execSync(`git clone --depth 1 ${GITHUB_REPO} ${projectPath}`);
+}
+
+function getInstallCommand(packageManager) {
+  switch(packageManager) {
+    case 'yarn':
+      return 'add'
+    case 'pnpm':
+    case 'npm':
+    default: 
+      return 'install'
+  }
 }
 
 async function installDependencies() {
@@ -146,9 +164,9 @@ async function installDependencies() {
   console.log(chalk.white.bgBlue.bold('Installing dependencies...'));
   // option to use PNPM, Yarn and NPM
   execSync(`${packageManager} install`);
-  // option to install css frameworks or none
+  // option to install css frameworks or none, for Yarn, have to use 'yarn add'
   if (cssStyleDependencies) {
-    execSync(`${packageManager} install ${cssStyleDependencies}`);
+    execSync(`${packageManager} ${getInstallCommand(packageManager)} ${cssStyleDependencies}`);
   }
 }
 
@@ -178,7 +196,7 @@ function startUp() {
 
 function success() {
   console.log(figlet.textSync('SUCCESS!'));
-  console.log(chalk.green.bold(`Airfoil NextJS App created! cd ${projectName} to start!`));
+  console.log(chalk.green.bold(`Airfoil NextJS App created! ${isCurrentDir && `cd ${projectName} to start!` }`));
 }
 
 async function init() {
