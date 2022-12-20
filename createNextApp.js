@@ -145,11 +145,11 @@ function cloneRepo() {
 function getInstallCommand(packageManager) {
   switch(packageManager) {
     case 'yarn':
-      return 'add'
+      return 'add -D'
     case 'pnpm':
     case 'npm':
     default: 
-      return 'install'
+      return 'install --save-dev'
   }
 }
 
@@ -196,7 +196,7 @@ function startUp() {
 
 function success() {
   console.log(figlet.textSync('SUCCESS!'));
-  console.log(chalk.green.bold(`Airfoil NextJS App created! ${isCurrentDir && `cd ${projectName} to start!` }`));
+  console.log(chalk.green.bold(`Airfoil NextJS App created! ${isCurrentDir ? '' : `cd ${projectName} to start!` }`));
 }
 
 async function init() {
